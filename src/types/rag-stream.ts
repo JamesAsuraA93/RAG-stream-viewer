@@ -95,3 +95,111 @@ export interface FormattedChunkItem {
   isFinal: boolean | null | undefined;
   isDuplicate: boolean | null | undefined;
 }
+
+
+// ====== ====== ====== FINAL ====== ====== ======
+
+// Event types
+export type EventTypeFinal = 
+  | "final_answer"
+  | "update_event"
+  | "thinking"
+  | "tool_call"
+  | "error"
+  | "unknown";
+
+// Tool-related types
+export interface QNASearchResultFinal {
+  tool_name: "qna_search";
+  question: string;
+  answer: string;
+  context: string | null;
+}
+
+export interface WebSearchResultFinal {
+  tool_name: "web_search";
+  question: null;
+  answer: null;
+  context: string;
+}
+
+export interface RAGSearchResultFinal {
+  tool_name: "rag_search";
+  question: null;
+  answer: null;
+  context: string;
+}
+
+export type SearchResultFinal = QNASearchResultFinal | WebSearchResultFinal | RAGSearchResultFinal;
+
+export interface SearchToolFinal {
+  tool_name: string;
+  context: string;
+  struct_data: SearchResultFinal[];
+  exec_time: number;
+}
+
+export interface SearchSourcesFinal {
+  qna_search?: SearchToolFinal;
+  web_search?: SearchToolFinal;
+  rag_search?: SearchToolFinal;
+}
+
+export interface SourceMetadataFinal {
+  searches: SearchSourcesFinal;
+}
+
+export interface TimingMetadataFinal {
+  started_at: string;
+  ended_at: string;
+  total_thinking_ms: number;
+  total_time_ms: number;
+}
+
+export interface AgentMetadataFinal {
+  type: string;
+  use_cache: boolean;
+}
+
+// Score metadata for update events
+export interface ScoreMetadataFinal {
+  sim_query_context: number;
+  avg_sim_answer_context: number;
+  sim_query_answer: number;
+}
+
+export interface UpdateEventMetadataFinal {
+  source: string;
+  score: ScoreMetadataFinal;
+}
+
+// Base metadata union type
+export type ItemMetadataFinal = 
+  | {
+      source: SourceMetadataFinal;
+      timing: TimingMetadataFinal;
+      tool: null;
+      agent: AgentMetadataFinal;
+    }
+  | UpdateEventMetadataFinal
+  | null;
+
+// Search result content for final answers
+export interface SearchResultContentFinal {
+  searches?: SearchSourcesFinal;
+  timing?: TimingMetadataFinal;
+}
+
+// Formatted chunk item (renamed from FormattedChunkItem)
+export interface RAGResponseItemFinal {
+  index: number;
+  timestamp: string;
+  event: EventType;
+  content: string | SearchResultContentFinal | Record<string, unknown>;
+  runId: string;
+  sequence: number;
+  metadata: ItemMetadataFinal;
+  isChunk: boolean | null | undefined;
+  isFinal: boolean | null | undefined;
+  isDuplicate: boolean | null | undefined;
+}
