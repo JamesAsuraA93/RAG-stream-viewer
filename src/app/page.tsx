@@ -141,7 +141,7 @@ export default function Home() {
                 <textarea
                   value={currentData}
                   onChange={handleInputChange}
-                  placeholder={`Paste your JSON data here (e.g., {"chunk_list": [ ... ]}) or just "chunk_list": [ ... ])`}
+                  placeholder={`Paste your RAG stream here. Accepts SSE-style lines starting with 'data: {...}' (ping lines like ': ping - ...' will be ignored), or a full JSON object with {"chunk_list": [...] }.`}
                   className="w-full h-[500px] p-4 rounded-lg bg-background border border-border font-mono text-xs resize-none focus:outline-none focus:ring-2 focus:ring-ring"
                   spellCheck={false}
                 />
