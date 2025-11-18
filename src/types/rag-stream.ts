@@ -75,38 +75,43 @@ export interface SearchResult {
 }
 
 export type EventType =
+  | "clarification"
   | "thinking_title"
   | "thinking_content"
   | "search_result"
   | "tool_call"
   | "tool_result"
   | "chunk"
-  | "final";
+  | "final"
+  | "final_answer";
 
-export interface FormattedChunkItem {
-  index: number;
-  timestamp: string;
-  event: EventType | "unknown"; // Fallback for missing event
-  content: string | SearchResultContent | Record<string, unknown>;
-  runId: string;
-  sequence: number;
-  metadata: ChunkMetadata | null;
-  isChunk: boolean | null | undefined;
-  isFinal: boolean | null | undefined;
-  isDuplicate: boolean | null | undefined;
-}
+// export interface FormattedChunkItem {
+//   index: number;
+//   timestamp: string;
+//   event: EventType | "unknown"; // Fallback for missing event
+//   content: string | SearchResultContent | Record<string, unknown>;
+//   runId: string;
+//   sequence: number;
+//   metadata: ChunkMetadata | null;
+//   isChunk: boolean | null | undefined;
+//   isFinal: boolean | null | undefined;
+//   isDuplicate: boolean | null | undefined;
+// }
 
 
 // ====== ====== ====== FINAL ====== ====== ======
 
 // Event types
 export type EventTypeFinal = 
+  | "clarification"
   | "final_answer"
   | "update_event"
   | "thinking"
   | "tool_call"
   | "error"
-  | "unknown";
+  | "unknown"
+  | "search_result";
+  
 
 // Tool-related types
 export interface QNASearchResultFinal {

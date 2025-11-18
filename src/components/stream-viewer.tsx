@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StreamEventCard } from "./stream-event-card";
 import { StreamStats } from "./stream-stats";
-import type { FormattedChunkItem, EventType, RAGResponseItemFinal } from "@/types/rag-stream";
+import type { EventType, RAGResponseItemFinal } from "@/types/rag-stream";
 import { Filter, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { RAGResponseCardFinal } from "./stream-event-card-final";
 
 interface StreamViewerProps {
-  items: FormattedChunkItem[];
+  items: any[];
 }
 
 export function StreamViewer({ items }: StreamViewerProps) {
@@ -32,7 +32,11 @@ export function StreamViewer({ items }: StreamViewerProps) {
   }, [items]);
 
   const events = useMemo(() => {
-    const eventSet = new Set(items.map((i) => i.event));
+    const eventSet = new Set(
+      items
+        .map((i) => i.event)
+        .filter((e): e is string => typeof e === "string" && e.length > 0)
+    );
     return Array.from(eventSet);
   }, [items]);
 
@@ -119,7 +123,9 @@ export function StreamViewer({ items }: StreamViewerProps) {
                   variant={selectedEvent === event ? "default" : "outline"}
                   className="cursor-pointer font-mono text-xs"
                   onClick={() =>
-                    setSelectedEvent(selectedEvent === event ? null : event)
+                    setSelectedEvent(
+                      selectedEvent === event ? null : (event as EventType | "unknown")
+                    )
                   }
                 >
                   {event.replace("_", " ")}
@@ -145,21 +151,29 @@ export function StreamViewer({ items }: StreamViewerProps) {
           </Card>
         ) : (
           filteredItems.map((item, index) => {
+            // Build a stable key with fallbacks in case index/sequence are missing
+            const runId = item?.run_id ?? item?.runId ?? item?.metadata?.run_id
+            const seq = item?.sequence ?? item?.chunk?.sequence
+            const idx = index
+
             if (item.isFinal) {
               const finalData = item as RAGResponseItemFinal;
+              const finalRunId = (finalData as any)?.run_id ?? finalData.runId ?? runId
+              const finalKey =
+                finalData?.index != null && finalData?.sequence != null
+                  ? `${finalData.index}-${finalData.sequence}`
+                  : `${finalRunId ?? "final"}-${finalData.sequence ?? seq ?? idx}-${idx}`
               return (
-                <RAGResponseCardFinal
-                  key={`${finalData.index}-${finalData.sequence}`}
-                  item={finalData}
-                 />
+                <RAGResponseCardFinal key={finalKey} item={finalData} />
               );
             }
-            return (
-              <StreamEventCard
-                key={`${item.index}-${item.sequence}`}
-                item={item}
-              />
-            );
+
+            const itemKey =
+              item?.index != null && seq != null
+                ? `${item.index}-${seq}`
+                : `${runId ?? "item"}-${seq ?? idx}-${idx}`
+
+            return <StreamEventCard key={itemKey} item={item} />;
           })
         )}
       </div>

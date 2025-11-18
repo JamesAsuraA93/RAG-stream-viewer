@@ -1,20 +1,25 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import type { FormattedChunkItem } from "@/types/rag-stream"
+// import type { FormattedChunkItem } from "@/types/rag-stream"
 import { Activity, Database, Search, Sparkles } from "lucide-react"
 
 interface StreamStatsProps {
-  items: FormattedChunkItem[]
+  items: any[]
 }
 
 export function StreamStats({ items }: StreamStatsProps) {
+
+  console.log("StreamStatsProps", {
+    items
+  })
+  
   const stats = {
     total: items.length,
-    thinking: items.filter((i) => i.event.includes("thinking")).length,
-    searches: items.filter((i) => i.event === "search_result").length,
-    toolCalls: items.filter((i) => i.event === "tool_call" || i.event === "tool_result").length,
-    duplicates: items.filter((i) => i.isDuplicate).length,
+    thinking: items.filter((i) => typeof i.event === "string" && i.event.includes("thinking")).length,
+    searches: items.filter((i) => typeof i.event === "string" && i.event === "search_result").length,
+    toolCalls: items.filter((i) => typeof i.event === "string" && (i.event === "tool_call" || i.event === "tool_result")).length,
+    duplicates: items.filter((i) => Boolean(i.isDuplicate) || Boolean(i.is_duplicate)).length,
   }
 
   const tools = [...new Set(items.map((i) => i.metadata?.tool?.name).filter(Boolean))]

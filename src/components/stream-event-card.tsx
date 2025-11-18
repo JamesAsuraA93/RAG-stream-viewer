@@ -3,14 +3,126 @@
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import type { FormattedChunkItem, SearchResultContent } from "@/types/rag-stream"
+import type { SearchResultContent } from "@/types/rag-stream"
 import { formatTimestamp, formatSearchResult } from "@/lib/format-rag-stream"
 import { Clock, Database, Search, Sparkles, Terminal, Zap, Code2, Eye, AlertCircle } from "lucide-react"
 import { useState } from "react"
 
-interface StreamEventCardProps {
-  item: FormattedChunkItem
-}
+// export interface RootInterface {
+//   event: string;
+//   content: string;
+//   run_id: string;
+//   parent_ids: any[];
+//   timestamp: string;
+//   sequence: number;
+//   metadata: Metadata;
+//   is_chunk: boolean;
+//   is_final: boolean;
+// }
+
+// export interface Metadata {
+//   source: Source;
+//   timing: Timing;
+//   tool: string;
+//   agent: Agent;
+// }
+
+// export interface Agent {
+//   type: string;
+//   use_cache: boolean;
+// }
+
+// export interface Timing {
+//   started_at: string;
+//   ended_at: string;
+//   total_thinking_ms: number;
+//   total_time_ms: number;
+// }
+
+// export interface Source {
+//   searches: Searches;
+// }
+
+// export interface Searches {
+//   qna_search: Qnasearch;
+//   web_search: Qnasearch;
+//   rag_search: Qnasearch;
+// }
+
+// export interface Qnasearch {
+//   tool_name: string;
+//   context: string;
+//   struct_data: Structdatum[];
+//   exec_time: number;
+// }
+
+// export interface Structdatum {
+//   tool_name: string;
+//   question: string;
+//   answer: string;
+//   context: string;
+//   hint: string;
+// }
+
+// export interface RootInterface {
+//   event: string;
+//   content: string;
+//   run_id: string;
+//   parent_ids: any[];
+//   timestamp: string;
+//   sequence: number;
+//   metadata: Metadata;
+//   is_chunk: boolean;
+//   is_final: boolean;
+// }
+
+// export interface Metadata {
+//   source: Source;
+//   timing: Timing;
+//   tool: string;
+//   agent: Agent;
+// }
+
+// export interface Agent {
+//   type: string;
+//   use_cache: boolean;
+// }
+
+// export interface Timing {
+//   started_at: string;
+//   ended_at: string;
+//   total_thinking_ms: number;
+//   total_time_ms: number;
+// }
+
+// export interface Source {
+//   searches: Searches;
+// }
+
+// export interface Searches {
+//   qna_search: Qnasearch;
+//   web_search: Qnasearch;
+//   rag_search: Qnasearch;
+// }
+
+// export interface Qnasearch {
+//   tool_name: string;
+//   context: string;
+//   struct_data: Structdatum[];
+//   exec_time: number;
+// }
+
+// export interface Structdatum {
+//   tool_name: string;
+//   question: string;
+//   answer: string;
+//   context: string;
+//   hint: string;
+// }
+
+// interface StreamEventCardProps {
+//   // item: FormattedChunkItem
+// }
 
 const eventIcons: Record<string, typeof Zap> = {
   thinking_title: Sparkles,
@@ -32,14 +144,14 @@ const eventColors: Record<string, string> = {
   final: "bg-pink-500/10 text-pink-400 border-pink-500/20",
 }
 
-function findMissingParams(item: FormattedChunkItem): string[] {
+function findMissingParams(item:any): string[] {
   const missing: string[] = []
 
   // Check top-level fields
   if (item.content === null || item.content === undefined || item.content === "") {
     missing.push("content")
   }
-  if (!item.runId) missing.push("runId")
+  if (!item.run_id) missing.push("run_id")
   if (!item.timestamp) missing.push("timestamp")
 
   // Check metadata fields
@@ -79,7 +191,12 @@ function isSearchResultContent(content: any): content is SearchResultContent {
   )
 }
 
-export function StreamEventCard({ item }: StreamEventCardProps) {
+export function StreamEventCard({ item }: any) {
+
+  console.log("StreamEventCard", {
+    item
+  })
+
   const [showRaw, setShowRaw] = useState(false)
 
   const Icon = (eventIcons as Record<string, typeof Zap>)[item.event] || Zap
@@ -91,7 +208,7 @@ export function StreamEventCard({ item }: StreamEventCardProps) {
     if (showRaw) {
       return (
         <pre className="text-xs font-mono text-muted-foreground overflow-x-auto bg-muted/30 p-3 rounded-lg border border-border/30">
-          {JSON.stringify(item, null, 2)}
+          {JSON.stringify(item.__raw, null, 2)}
         </pre>
       )
     }
@@ -129,14 +246,14 @@ export function StreamEventCard({ item }: StreamEventCardProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="outline" className="font-mono text-xs">
-                {item.event.replace("_", " ").toUpperCase()}
+                {String(item.event ?? "unknown").replaceAll("_", " ").toUpperCase()}
               </Badge>
               {item.metadata?.tool?.name && (
                 <Badge variant="secondary" className="text-xs">
                   {item.metadata.tool.name}
                 </Badge>
               )}
-              {item.isDuplicate && (
+              {(item.isDuplicate || item.is_duplicate) && (
                 <Badge variant="destructive" className="text-xs">
                   Duplicate
                 </Badge>
@@ -166,6 +283,7 @@ export function StreamEventCard({ item }: StreamEventCardProps) {
           </Button>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Clock className="w-3 h-3" />
+            {item.timestamp}
             <span className="font-mono">{formatTimestamp(item.timestamp)}</span>
           </div>
         </div>
@@ -200,7 +318,11 @@ export function StreamEventCard({ item }: StreamEventCardProps) {
           <div className="flex items-center gap-4 pt-2 border-t border-border/30 text-xs text-muted-foreground">
             <span className="font-mono">Index: {item.index}</span>
             <span className="font-mono">Seq: {item.sequence}</span>
-            {item.metadata?.source && <span className="font-mono">Source: {item.metadata.source}</span>}
+            {item.metadata?.source && (
+              <span className="font-mono">
+                Source: {typeof item.metadata.source === "string" ? item.metadata.source : JSON.stringify(item.metadata.source)}
+              </span>
+            )}
           </div>
         )}
       </div>

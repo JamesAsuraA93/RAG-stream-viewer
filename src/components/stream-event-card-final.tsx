@@ -21,9 +21,9 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 
-interface RAGResponseCardProps {
-  item: RAGResponseItemFinal
-}
+// interface RAGResponseCardProps {
+//   item: RAGResponseItemFinal
+// }
 
 const eventIcons: Record<string, typeof Zap> = {
   final_answer: CheckCircle,
@@ -43,7 +43,7 @@ const eventColors: Record<string, string> = {
   unknown: "bg-gray-500/10 text-gray-400 border-gray-500/20",
 }
 
-function findMissingParams(item: RAGResponseItemFinal): string[] {
+function findMissingParams(item: any): string[] {
   const missing: string[] = []
 
   // Check top-level fields
@@ -113,7 +113,12 @@ function isUpdateEventMetadata(metadata: ItemMetadataFinal): metadata is Extract
   return metadata !== null && typeof metadata === 'object' && 'score' in metadata
 }
 
-export function RAGResponseCardFinal({ item }: RAGResponseCardProps) {
+export function RAGResponseCardFinal({ item }: any) {
+
+  // console.log("RAGResponseCardFinal", {
+  //   item
+  // })
+
   const [showRaw, setShowRaw] = useState(false)
   const [expandedTools, setExpandedTools] = useState<Set<string>>(new Set())
 
@@ -169,7 +174,7 @@ export function RAGResponseCardFinal({ item }: RAGResponseCardProps) {
             </Button>
             {expandedTools.has('qna_search') && (
               <div className="mt-2 space-y-2">
-                {searches.qna_search.struct_data.map((result, idx) => (
+                {searches.qna_search.struct_data.map((result:any, idx: number) => (
                   <div key={idx} className="p-2 bg-background/50 rounded text-xs space-y-1">
                     <p className="font-medium text-foreground">Q: {result.question}</p>
                     <p className="text-muted-foreground">A: {result.answer}</p>
@@ -202,7 +207,7 @@ export function RAGResponseCardFinal({ item }: RAGResponseCardProps) {
             </Button>
             {expandedTools.has('web_search') && (
               <div className="mt-2 space-y-2">
-                {searches.web_search.struct_data.map((result, idx) => (
+                {searches.web_search.struct_data.map((result: any, idx: number) => (
                   <div key={idx} className="p-2 bg-background/50 rounded text-xs">
                     <p className="text-muted-foreground whitespace-pre-wrap">{result.context}</p>
                   </div>
@@ -234,7 +239,7 @@ export function RAGResponseCardFinal({ item }: RAGResponseCardProps) {
             </Button>
             {expandedTools.has('rag_search') && (
               <div className="mt-2 space-y-2">
-                {searches.rag_search.struct_data.map((result, idx) => (
+                {searches.rag_search.struct_data.map((result: any, idx: number) => (
                   <div key={idx} className="p-2 bg-background/50 rounded text-xs">
                     <p className="text-muted-foreground whitespace-pre-wrap">{result.context}</p>
                   </div>
@@ -307,7 +312,7 @@ export function RAGResponseCardFinal({ item }: RAGResponseCardProps) {
     if (showRaw) {
       return (
         <pre className="text-xs font-mono text-muted-foreground overflow-x-auto bg-muted/30 p-3 rounded-lg border border-border/30">
-          {JSON.stringify(item, null, 2)}
+          {JSON.stringify(item.__raw, null, 2)}
         </pre>
       )
     }
@@ -384,6 +389,7 @@ export function RAGResponseCardFinal({ item }: RAGResponseCardProps) {
           </Button>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Clock className="w-3 h-3" />
+            {item.timestamp}
             <span className="font-mono">{formatTimestamp(item.timestamp)}</span>
           </div>
         </div>
