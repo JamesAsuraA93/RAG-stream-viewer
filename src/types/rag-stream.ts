@@ -75,6 +75,8 @@ export interface SearchResult {
 }
 
 export type EventType =
+  | "classification"
+  | "update_event"
   | "clarification"
   | "thinking_title"
   | "thinking_content"
@@ -82,7 +84,7 @@ export type EventType =
   | "tool_call"
   | "tool_result"
   | "chunk"
-  | "final"
+  | "latency"
   | "final_answer";
 
 // export interface FormattedChunkItem {
@@ -103,14 +105,17 @@ export type EventType =
 
 // Event types
 export type EventTypeFinal = 
-  | "clarification"
-  | "final_answer"
+  | "classification"
   | "update_event"
-  | "thinking"
+  | "clarification"
+  | "thinking_title"
+  | "thinking_content"
+  | "search_result"
   | "tool_call"
-  | "error"
-  | "unknown"
-  | "search_result";
+  | "tool_result"
+  | "chunk"
+  | "latency"
+  | "final_answer";
   
 
 // Tool-related types
